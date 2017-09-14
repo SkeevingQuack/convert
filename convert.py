@@ -13,9 +13,16 @@ class Field:
         self.guess = guess
         # string
         self.confirmed = False
+        self.key = cls.get_primary_key()
 
     CRC32 = re.compile(r'[A-Fa-f0-9]{8}')
     TYPE = re.compile(r'(720|1080|TV|BD|FLAC|AAC|AC3)')
+
+    key = 0
+    @classmethod
+    def get_primary_key(cls):
+        cls.key += 1
+        return cls.key-1
 
 class Brackets:
     pairs = {'[':']', '(':')'}
