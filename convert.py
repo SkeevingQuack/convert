@@ -65,14 +65,14 @@ def debracket(string):
         return [string[:index].strip(), *debracket(string[index:])]
 
 def parsenames(pathlist):
-    filenames = [os.path.split(name)[1].rpartition('.')[3] for name in pathlist]
+    filenames = [os.path.split(name)[1].rpartition('.')[0] for name in pathlist]
     # .mkv should be assumed
     splitnames = [debracket(name) for name in filenames]
-    if len(set(map(len, splitnames))):
+    if len(set(map(len, splitnames))) > 1:
         raise FieldMismatch("File names too different: field quantity")
 
     fields = []
-    for index, item in splitnames[0]:
+    for index, item in enumerate(splitnames[0]):
         if type(item) == type(()):
             examples = set(ex[index][0] for ex in splitnames)
             if index == 0 and len(examples) == 1:
@@ -89,7 +89,7 @@ def parsenames(pathlist):
                 continue
         elif type(item) == type(''):
             examples = set(ex[index] for ex in splitnames)
-            if index == 2 and len(examples) > 1:
+            if index < 2 and len(examples) > 1:
                 fields.append(Field(index, examples, guess="main"))
                 continue
             else:
@@ -97,7 +97,7 @@ def parsenames(pathlist):
                 continue
         else:
             raise TypeError("Found {} while expecing str or tuple".format(
-                type(item))
+                type(item)))
 
     confirmed_fields = []
     for field in fields:
@@ -105,23 +105,21 @@ def parsenames(pathlist):
         [print(x) for x in field.values] #good practice?
         while True:
             if field.guess:
-                user = input("Field name? (default={}):".format(field.guess))
+                user = input("Field name? (default={}): ".format(field.guess))
                 if user == '':
                     user = field.guess
             else:
-                user = input("Field name?")
-            
+                user = input("Field name?: ")
+
             if user == '' or user in confirmed_fields:
                 print("Please provide a unique field name.")
             else:
                 confirmed_fields.append(user)
+                field.guess = user
                 field.confirmed = True
+                break
 
     return fields
-    # find fields in the input files
-    # guess what the fields are
-    # confirm with user?
-    # return list of fields
 
 def mkformat(fields):
     # ask for order
@@ -155,6 +153,13 @@ if __name__ == "__main__":
         mapping = mapper(inputnames, outformat)
 
         processcontroller(mapping)
+
+    if len(argv) < 3:
+#        print(argv)
+        inputnames = enumerateinputs(argv[1])
+#        [print(x) for x in inputnames]
+        fields = parsenames(inputnames)
+        [print(x.index, x.guess, x.values) for x in fields]
 
     else:
         print("I don't know what you're saying.")
