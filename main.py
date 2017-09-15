@@ -18,9 +18,12 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input-directory", default='')
     parser.add_argument("-o", "--output-directory", default='')
     args = parser.parse_args()
-
+    
     files = validate_i(args.input_directory)
     while not files:
-        files = Srcfile.fromdirectory(input("Input file directory: "))
+        files = validate_i(input("Input file directory: "))
 
-    print(files)
+    
+    fields = [x.debracket() for x in files]
+
+    [print(x) for x in fields]
