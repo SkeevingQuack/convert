@@ -5,6 +5,8 @@ class Srcfile:
     @classmethod
     def fromdirectory(cls, dir):
         path = Path(dir).resolve(strict=True)
+        if not path.is_dir():
+            raise NotADirectoryError
         infiles = []
         for child in path.iterdir():
             if child.is_file() and child.suffx == '.mkv':
